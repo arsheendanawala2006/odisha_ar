@@ -1,0 +1,527 @@
+/* ─────────────────────────────────────────────────────────────
+   ODISHA, IN COLOUR — IMMERSIVE WEBAR STYLESHEET
+   Brand Identity & Visual System
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  --navy: #0A1D37;
+  --navy-deep: #061224;
+  --vermillion: #A72626;
+  --vermillion-bright: #C73232;
+  --saffron: #E8601C;
+  --saffron-bright: #F27429;
+  --gold: #D4AF37;
+  --gold-bright: #F7D560;
+  --paper: #FAF7F2;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--navy-deep);
+  color: var(--navy);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  position: fixed;
+}
+
+/* ───────── 3D / AR Viewport Container ───────── */
+#ar-viewport {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: #000;
+}
+
+#ar-viewport video {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#ar-viewport canvas {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 2;
+}
+
+/* ───────── Opening Screen ───────── */
+.landing-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: calc(var(--safe-top) + 1rem) 1.25rem calc(var(--safe-bottom) + 1rem);
+  background-color: var(--navy);
+  background-image: url('../assets/brand_bg.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  transition: opacity 0.7s cubic-bezier(0.25, 1, 0.5, 1), transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.landing-screen.hidden {
+  opacity: 0;
+  transform: scale(1.03);
+  pointer-events: none;
+}
+
+/* Content Container placed inside the white card of the background */
+.landing-card-content {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 16px 40px -10px rgba(10, 29, 55, 0.25);
+  padding: 1.8rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: cardEntrance 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes cardEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Official Logo Image */
+.brand-logo-img {
+  width: min(70%, 190px);
+  height: auto;
+  display: block;
+  margin: 0 auto 0.8rem;
+  filter: drop-shadow(0 2px 8px rgba(10, 29, 55, 0.15));
+}
+
+.brand-tagline {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--vermillion);
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+}
+
+.campaign-headline {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin: 0 0 0.45rem;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.campaign-description {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #3B4A5D;
+  margin: 0 0 1.5rem;
+  max-width: 300px;
+}
+
+/* Distinctive START EXPERIENCE Button */
+.btn-start {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, var(--saffron) 0%, var(--vermillion) 100%);
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 1.05rem 2.2rem;
+  border: none;
+  border-radius: 12px 30px 12px 28px;
+  box-shadow: 0 12px 28px -6px rgba(167, 38, 38, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+}
+
+.btn-start::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%);
+  transform: rotate(25deg) translateY(-100%);
+  animation: lightSweep 4.5s infinite;
+}
+
+@keyframes lightSweep {
+  0%, 70% { transform: rotate(25deg) translateY(-120%); }
+  100% { transform: rotate(25deg) translateY(120%); }
+}
+
+.btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -6px rgba(167, 38, 38, 0.55);
+}
+
+.btn-start:active {
+  transform: translateY(1px);
+  box-shadow: 0 8px 18px -4px rgba(167, 38, 38, 0.4);
+}
+
+.btn-start svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+/* Camera Hint Note */
+.camera-hint {
+  margin-top: 1.1rem;
+  font-size: 0.82rem;
+  color: #6C7D93;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.camera-hint svg {
+  width: 15px;
+  height: 15px;
+  fill: #8598AE;
+  flex-shrink: 0;
+}
+
+.err-notice {
+  margin-top: 1rem;
+  font-size: 0.86rem;
+  color: #C73232;
+  line-height: 1.45;
+  font-weight: 500;
+  max-width: 320px;
+}
+
+/* ───────── In-Experience AR HUD ───────── */
+.ar-hud {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(var(--safe-top) + 1rem) 1.25rem calc(var(--safe-bottom) + 1.25rem);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.ar-hud.active {
+  opacity: 1;
+}
+
+/* Top Bar: Odisha Pill & Audio Toggle */
+.hud-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.hud-brand-pill {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(10, 29, 55, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 0.45rem 0.95rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  color: #FFF;
+}
+
+.hud-brand-pill .pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--saffron);
+  box-shadow: 0 0 8px var(--saffron);
+}
+
+.hud-brand-pill span {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hud-actions {
+  display: flex;
+  gap: 0.6rem;
+  pointer-events: auto;
+}
+
+.hud-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(10, 29, 55, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: all 0.25s ease;
+}
+
+.hud-btn:active {
+  transform: scale(0.92);
+}
+
+.hud-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* Center Viewfinder Guide (When Searching for Poster) */
+.viewfinder-guide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(78vw, 300px);
+  aspect-ratio: 1 / 1.414;
+  border: 2px dashed rgba(247, 213, 96, 0.45);
+  border-radius: 16px;
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.viewfinder-guide.locked {
+  border-color: var(--gold-bright);
+  border-style: solid;
+  box-shadow: 0 0 30px rgba(247, 213, 96, 0.35);
+  transform: translate(-50%, -50%) scale(1.02);
+  opacity: 0;
+}
+
+.viewfinder-corners {
+  position: absolute;
+  inset: -6px;
+  pointer-events: none;
+}
+
+.corner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: var(--saffron);
+  border-style: solid;
+}
+.corner.tl { top: 0; left: 0; border-width: 4px 0 0 4px; border-radius: 6px 0 0 0; }
+.corner.tr { top: 0; right: 0; border-width: 4px 4px 0 0; border-radius: 0 6px 0 0; }
+.corner.bl { bottom: 0; left: 0; border-width: 0 0 4px 4px; border-radius: 0 0 0 6px; }
+.corner.br { bottom: 0; right: 0; border-width: 0 4px 4px 0; border-radius: 0 0 6px 0; }
+
+/* Dynamic Status Banner at Bottom */
+.hud-status-banner {
+  pointer-events: auto;
+  align-self: center;
+  max-width: 92%;
+  background: rgba(10, 29, 55, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 0.8rem 1.4rem;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.4s ease;
+}
+
+.status-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.status-icon.spin {
+  animation: iconSpin 2s linear infinite;
+}
+
+@keyframes iconSpin {
+  100% { transform: rotate(360deg); }
+}
+
+/* ───────── Cultural Storytelling Hotspot Modal ───────── */
+.story-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(6, 18, 36, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 1.5rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.story-modal.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.story-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--paper);
+  border-radius: 28px 28px 24px 24px;
+  padding: 2rem 1.8rem 1.8rem;
+  box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.45);
+  position: relative;
+  transform: translateY(40px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.story-modal.open .story-card {
+  transform: translateY(0);
+}
+
+.story-close {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(10, 29, 55, 0.08);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+  transition: background 0.2s ease;
+}
+
+.story-close:hover {
+  background: rgba(10, 29, 55, 0.16);
+}
+
+.story-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vermillion);
+  background: rgba(167, 38, 38, 0.08);
+  padding: 0.3rem 0.75rem;
+  border-radius: 12px;
+  margin-bottom: 0.6rem;
+}
+
+.story-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 0.8rem;
+  line-height: 1.25;
+}
+
+.story-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #38485C;
+  margin: 0 0 1.5rem;
+}
+
+.story-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(10, 29, 55, 0.08);
+}
+
+.story-link {
+  color: var(--saffron);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  letter-spacing: 0.04em;
+}
+
+.story-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 380px) {
+  .landing-card-content {
+    padding: 1.5rem 1.2rem;
+  }
+  .brand-logo-img {
+    width: 160px;
+  }
+  .campaign-headline {
+    font-size: 1.35rem;
+  }
+  .btn-start {
+    padding: 0.9rem 1.6rem;
+    font-size: 0.95rem;
+  }
+}

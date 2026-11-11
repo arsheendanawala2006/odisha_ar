@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0A1D37">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>ODISHA, IN COLOUR — Immersive WebAR</title>
+
+  <!-- Import Map for Three.js & MindAR ES Modules -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+
+  <!-- WebAR Camera & 3D Viewport -->
+  <div id="ar-viewport"></div>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       LANDING SCREEN (With Approved Artwork & Official Logo)
+       ───────────────────────────────────────────────────────────── -->
+  <section id="landing-screen" class="landing-screen">
+    <div class="landing-card-content">
+      <!-- Official Odisha Brand Logo with 6 illustrated cultural tiles -->
+      <img src="./assets/odisha_logo.png" alt="Odisha Tourism" class="brand-logo-img">
+
+      <p class="brand-tagline">A DIFFERENT KIND OF INCREDIBLE</p>
+      <h1 class="campaign-headline">ODISHA, IN COLOUR</h1>
+      <p class="campaign-description">
+        Hold your phone up to the poster and watch its colours wake up.
+      </p>
+
+      <button id="btn-start" class="btn-start">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+        </svg>
+        <span>START EXPERIENCE</span>
+      </button>
+
+      <p class="camera-hint">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+          <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+        </svg>
+        <span>Allow camera access & point towards poster</span>
+      </p>
+
+      <p id="err-notice" class="err-notice" role="alert"></p>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       IN-EXPERIENCE AR HUD
+       ───────────────────────────────────────────────────────────── -->
+  <aside id="ar-hud" class="ar-hud">
+    <div class="hud-top-bar">
+      <div class="hud-brand-pill">
+        <span class="pill-dot" aria-hidden="true"></span>
+        <span>ODISHA AR</span>
+      </div>
+
+      <div class="hud-actions">
+        <button id="btn-audio" class="hud-btn" aria-label="Toggle ambient sound">
+          <span id="audio-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Viewfinder Guide Frame -->
+    <div id="viewfinder-guide" class="viewfinder-guide" aria-hidden="true">
+      <div class="viewfinder-corners">
+        <span class="corner tl"></span>
+        <span class="corner tr"></span>
+        <span class="corner bl"></span>
+        <span class="corner br"></span>
+      </div>
+    </div>
+
+    <!-- Dynamic Status Banner -->
+    <div id="status-banner" class="hud-status-banner">
+      <svg id="status-icon" class="status-icon spin" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2z" fill="currentColor"/>
+      </svg>
+      <span id="status-text">Point your camera at the poster. Keep all of it in view.</span>
+    </div>
+  </aside>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       INTERACTIVE CULTURAL STORY MODAL
+       ───────────────────────────────────────────────────────────── -->
+  <div id="story-modal" class="story-modal" role="dialog" aria-modal="true" aria-labelledby="story-title">
+    <div class="story-card">
+      <button id="story-close" class="story-close" aria-label="Close story">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+
+      <span id="story-tag" class="story-tag">TRADITION</span>
+      <h3 id="story-title" class="story-title">Cultural Story</h3>
+      <p id="story-body" class="story-body">Cultural description and history.</p>
+
+      <footer class="story-footer">
+        <a id="story-link" class="story-link" href="https://odishatourism.gov.in/" target="_blank" rel="noopener noreferrer">
+          <span>Discover Odisha Tourism</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-8.29-1.42 1.42 5.43 5.43H5v2.44z"/>
+          </svg>
+        </a>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       MASTER APPLICATION SCRIPT
+       ───────────────────────────────────────────────────────────── -->
+  <script type="module">
+    import * as THREE from 'three';
+    import { MindARThree } from 'mindar-image-three';
+
+    const $ = id => document.getElementById(id);
+    const POSTER_ASPECT = 3508 / 2480; // 1.4145
+
+    // ─────────────────────────────────────────────
+    // Web Audio Procedural Soundscape
+    // ─────────────────────────────────────────────
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.isMuted = true;
+        this.masterGain = null;
+        this.droneOscs = [];
+      }
+      init() {
+        if (this.ctx) return;
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) return;
+          this.ctx = new AudioContext();
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : 0.6, this.ctx.currentTime);
+          this.masterGain.connect(this.ctx.destination);
+        } catch (e) { console.warn('Audio init:', e); }
+      }
+      toggle() {
+        this.init();
+        if (!this.ctx) return false;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        this.isMuted = !this.isMuted;
+        const target = this.isMuted ? 0 : 0.6;
+        this.masterGain.gain.setTargetAtTime(target, this.ctx.currentTime, 0.05);
+        if (!this.isMuted && this.droneOscs.length === 0) this.startDrone();
+        return !this.isMuted;
+      }
+      startDrone() {
+        if (!this.ctx || this.isMuted) return;
+        const now = this.ctx.currentTime;
+        const droneGain = this.ctx.createGain();
+        droneGain.gain.setValueAtTime(0.001, now);
+        droneGain.gain.exponentialRampToValueAtTime(0.18, now + 2.5);
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(450, now);
+        droneGain.connect(filter);
+        filter.connect(this.masterGain);
+
+        const o1 = this.ctx.createOscillator(); o1.frequency.setValueAtTime(108, now); // Sa
+        const o2 = this.ctx.createOscillator(); o2.frequency.setValueAtTime(162, now); // Pa
+        o1.connect(droneGain); o2.connect(droneGain);
+        o1.start(now); o2.start(now);
+        this.droneOscs = [o1, o2];
+      }
+      chime() {
+        if (!this.ctx || this.isMuted) return;
+        const now = this.ctx.currentTime;
+        const g = this.ctx.createGain();
+        g.connect(this.masterGain);
+        g.gain.setValueAtTime(0.28, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 2.5);
+        [540, 810, 1080].forEach(f => {
+          const o = this.ctx.createOscillator();
+          o.frequency.setValueAtTime(f, now);
+          o.connect(g);
+          o.start(now); o.stop(now + 2.5);
+        });
+      }
+      shimmer() {
+        if (!this.ctx || this.isMuted) return;
+        const now = this.ctx.currentTime;
+        [432, 540, 648, 864].forEach((f, i) => {
+          const t = now + i * 0.35;
+          const o = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          o.frequency.setValueAtTime(f, t);
+          g.gain.setValueAtTime(0.001, t);
+          g.gain.linearRampToValueAtTime(0.1, t + 0.1);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+          o.connect(g); g.connect(this.masterGain);
+          o.start(t); o.stop(t + 1.3);
+        });
+      }
+      tap() {
+        if (!this.ctx || this.isMuted) return;
+        const now = this.ctx.currentTime;
+        const o = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        o.frequency.setValueAtTime(720, now);
+        o.frequency.exponentialRampToValueAtTime(1100, now + 0.15);
+        g.gain.setValueAtTime(0.15, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        o.connect(g); g.connect(this.masterGain);
+        o.start(now); o.stop(now + 0.3);
+      }
+    }
+    const sound = new SoundEngine();
+
+    // ─────────────────────────────────────────────
+    // Cultural Stories Data
+    // ─────────────────────────────────────────────
+    const STORIES = {
+      dancer: {
+        tag: 'CLASSICAL TRADITION',
+        title: 'Odissi Classical Dance & Sculptural Grace',
+        body: 'Dating back over two millennia to ancient temple friezes, Odissi is celebrated for its graceful Tribhanga posture, mudras, and expressive abhinaya. The dancer is adorned in handwoven silk, silver filigree jewellery (Tarakasi), and a floral Mukuta crest.'
+      },
+      mandir: {
+        tag: 'UNESCO WORLD HERITAGE',
+        title: 'Konark Sun Temple — 13th-Century Solar Chariot',
+        body: 'Conceived as a colossal celestial chariot with 24 carved stone wheels pulled by seven horses, the Sun Temple was built in 1250 CE by King Narasimhadeva I. Its reliefs capture cosmic time and Odisha’s architectural zenith.'
+      },
+      chariot: {
+        tag: 'LIVING HERITAGE',
+        title: 'Puri Rath Yatra — Festival of Chariots',
+        body: 'Every summer in sacred Puri, the 45-foot wooden chariots of Lord Jagannath journey through sea-swept crowds. The red and yellow canopies (Chandua) are hand-stitched by Pipili master artisans.'
+      },
+      textile: {
+        tag: 'INDIGENOUS TEXTILES',
+        title: 'Sambalpuri Bandha — Sacred Ikat Weaving',
+        body: 'The world-renowned Sambalpuri Ikat is a centuries-old tie-dye weaving craft from western Odisha. Weavers bind warp and weft yarns with temple spires (Kumbha) and lotus motifs before weaving lustrous silk.'
+      },
+      tribal: {
+        tag: 'COMMUNITY & FOLK ART',
+        title: 'Indigenous Traditions & Sahi Jata Folk Masks',
+        body: 'Odisha is home to 62 indigenous tribal communities, celebrated for distinct adornments like layered silver Hansuli. Alongside them flourish vibrant folk theatre traditions featuring hand-carved ochre masks.'
+      }
+    };
+
+    function showStory(id) {
+      const s = STORIES[id];
+      if (!s) return;
+      $('story-tag').textContent = s.tag;
+      $('story-title').textContent = s.title;
+      $('story-body').textContent = s.body;
+      $('story-modal').classList.add('open');
+      sound.tap();
+    }
+    $('story-close').onclick = () => $('story-modal').classList.remove('open');
+
+    // ─────────────────────────────────────────────
+    // Audio Toggle in HUD
+    // ─────────────────────────────────────────────
+    $('btn-audio').onclick = () => {
+      const unmuted = sound.toggle();
+      $('audio-icon').innerHTML = unmuted
+        ? `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`
+        : `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>`;
+    };
+
+    // ─────────────────────────────────────────────
+    // GLSL Colour Reveal Shader
+    // ─────────────────────────────────────────────
+    const vertShader = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+    const fragShader = `
+      uniform sampler2D tBW, tCol; uniform float uP, uT, uA; uniform vec2 uO; varying vec2 vUv;
+      float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+      float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
+        return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y); }
+      float fbm(vec2 p){ float v=0.,a=.5; for(int i=0;i<4;i++){ v+=a*noise(p); p*=2.03; a*=.5; } return v; }
+      void main(){
+        vec4 c = texture2D(tCol, vUv); vec3 b = texture2D(tBW, vUv).rgb;
+        vec2 p = vec2(vUv.x, vUv.y * uA);
+        float d = distance(p, vec2(uO.x, uO.y * uA)) + (fbm(p * 3.8 + vec2(0., uT * 0.06)) - 0.5) * 0.45;
+        float reach = uP * 1.75;
+        float r = 1.0 - smoothstep(reach - 0.26, reach, d);
+        float rim = r * (1.0 - r) * 4.0;
+        vec3 col = mix(b, c.rgb, smoothstep(0.0, 1.0, r));
+        col += vec3(1.0, 0.76, 0.32) * pow(rim, 1.5) * 0.95; // Golden halo
+        col += step(0.982, hash(floor(vUv * vec2(280.0, 280.0 * uA)) + floor(uT * 8.0))) * rim * 2.2; // Sparkles
+        col *= 1.0 + 0.04 * sin((vUv.x * 2.5 + vUv.y) * 4.0 - uT * 0.8) * r;
+        gl_FragColor = vec4(col, c.a);
+        #include <colorspace_fragment>
+      }
+    `;
+
+    // ─────────────────────────────────────────────
+    // START EXPERIENCE CLICK HANDLER
+    // ─────────────────────────────────────────────
+    $('btn-start').onclick = async () => {
+      $('err-notice').textContent = '';
+      $('btn-start').disabled = true;
+      $('btn-start').innerHTML = `
+        <svg class="status-icon spin" viewBox="0 0 24 24"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2z" fill="currentColor"/></svg>
+        <span>Opening Camera...</span>
+      `;
+
+      sound.init();
+
+      try {
+        await launchAR();
+        $('landing-screen').classList.add('hidden');
+        $('ar-hud').classList.add('active');
+      } catch (err) {
+        console.error('AR Camera Launch Error:', err);
+        $('btn-start').disabled = false;
+        $('btn-start').innerHTML = `
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          <span>Try Again</span>
+        `;
+        if (err && err.name === 'NotAllowedError') {
+          $('err-notice').textContent = 'Camera access was blocked. Please enable camera permission in your browser settings and tap Try Again.';
+        } else if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+          $('err-notice').textContent = 'Camera access requires a secure HTTPS connection.';
+        } else {
+          $('err-notice').textContent = 'Unable to start camera. Please verify targets.mind exists and reload.';
+        }
+      }
+    };
+
+    // ─────────────────────────────────────────────
+    // MAIN WEBAR SCENE & 2.5D RUNTIME
+    // ─────────────────────────────────────────────
+    async function launchAR() {
+      const mindar = new MindARThree({
+        container: $('ar-viewport'),
+        imageTargetSrc: './assets/targets.mind',
+        uiLoading: 'no', uiScanning: 'no', uiError: 'no',
+        filterMinCF: 0.0005, filterBeta: 45, missTolerance: 14, warmupTolerance: 5
+      });
+
+      const { renderer, scene, camera } = mindar;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+      // Texture loader helper
+      const loader = new THREE.TextureLoader();
+      const loadTex = async (url) => {
+        const t = await loader.loadAsync(url);
+        t.colorSpace = THREE.SRGBColorSpace;
+        t.anisotropy = 4;
+        return t;
+      };
+
+      // Load essential textures in parallel
+      const [
+        tBase, tShadow, tBW, tCol,
+        tDancer, tEyelid, tDancerShadow,
+        tSaree, tMandir, tChariot, tTribal, tMask
+      ] = await Promise.all([
+        loadTex('./assets/base.webp'),
+        loadTex('./assets/shadow.webp'),
+        loadTex('./assets/photos_bw.webp'),
+        loadTex('./assets/photos_col.webp'),
+        loadTex('./assets/dancer.png'),
+        loadTex('./assets/dancer_eyelid_only.png'),
+        loadTex('./assets/dancer_shadow.png'),
+        loadTex('./assets/saree_green.png'),
+        loadTex('./assets/mandir.png'),
+        loadTex('./assets/chariot.png'),
+        loadTex('./assets/tribal.png'),
+        loadTex('./assets/mask.png')
+      ]);
+
+      const rig = new THREE.Group();
+
+      // 1. Base Poster Plane
+      const baseMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.0, POSTER_ASPECT),
+        new THREE.MeshBasicMaterial({ map: tBase, depthWrite: false })
+      );
+      baseMesh.renderOrder = 0;
+      rig.add(baseMesh);
+
+      // 2. Soft Background Shadow
+      const shadowMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.0, POSTER_ASPECT),
+        new THREE.MeshBasicMaterial({ map: tShadow, transparent: true, depthWrite: false, opacity: 0.4 })
+      );
+      shadowMesh.position.z = 0.005;
+      shadowMesh.renderOrder = 1;
+      rig.add(shadowMesh);
+
+      // 3. Signature Colour Reveal Photo Plane
+      const revealMat = new THREE.ShaderMaterial({
+        vertexShader: vertShader,
+        fragmentShader: fragShader,
+        transparent: true,
+        depthWrite: false,
+        uniforms: {
+          tBW: { value: tBW },
+          tCol: { value: tCol },
+          uP: { value: 0.0 },
+          uT: { value: 0.0 },
+          uA: { value: POSTER_ASPECT },
+          uO: { value: new THREE.Vector2(0.54, 0.49) }
+        }
+      });
+      const revealMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, POSTER_ASPECT), revealMat);
+      revealMesh.position.z = 0.01;
+      revealMesh.renderOrder = 2;
+      rig.add(revealMesh);
+
+      // 4. Exact 2.5D Isolated Meshes
+      const createPlane = (tex, w, h, x, y, z, order) => {
+        const p = new THREE.Mesh(
+          new THREE.PlaneGeometry(w, h),
+          new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false })
+        );
+        p.position.set(x, y, z);
+        p.renderOrder = order;
+        rig.add(p);
+        return p;
+      };
+
+      const mMandir  = createPlane(tMandir,  0.4560, 0.6806,  0.0171,  0.2577, 0.014, 4);
+      const mChariot = createPlane(tChariot, 0.3585, 0.7262, -0.2760,  0.0744, 0.024, 5);
+      const mTribal  = createPlane(tTribal,  0.2169, 0.3375,  0.1948,  0.0861, 0.028, 6);
+      const mSaree   = createPlane(tSaree,   0.4577, 0.4577,  0.2825, -0.0119, 0.035, 7);
+      const mMask    = createPlane(tMask,    0.4032, 0.4032, -0.2387, -0.3262, 0.040, 8);
+      const mDShadow = createPlane(tDancerShadow, 0.6544, 0.7101, 0.0704, -0.1728, 0.006, 8);
+      const mDancer  = createPlane(tDancer,  0.6266, 0.7617,  0.0593, -0.2603, 0.045, 9);
+      const mEyelid  = createPlane(tEyelid,  0.0887, 0.0645,  0.0726,  0.0077, 0.047, 10);
+      mEyelid.material.opacity = 0;
+
+      // 5. Golden Sun Dust Particles
+      const particleCount = 70;
+      const pa = new Float32Array(particleCount * 3);
+      for (let i = 0; i < particleCount; i++) {
+        pa[i * 3 + 0] = (Math.random() - 0.5) * 0.95;
+        pa[i * 3 + 1] = (Math.random() - 0.5) * POSTER_ASPECT;
+        pa[i * 3 + 2] = 0.05 + Math.random() * 0.12;
+      }
+      const pGeom = new THREE.BufferGeometry();
+      pGeom.setAttribute('position', new THREE.BufferAttribute(pa, 3));
+
+      // Luminous canvas dot texture
+      const c = document.createElement('canvas'); c.width = c.height = 64;
+      const ctx = c.getContext('2d');
+      const rad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      rad.addColorStop(0, '#FFFFFF'); rad.addColorStop(0.4, '#FFD700'); rad.addColorStop(1, 'rgba(232,96,28,0)');
+      ctx.fillStyle = rad; ctx.fillRect(0, 0, 64, 64);
+      const dotTex = new THREE.CanvasTexture(c);
+
+      const pMat = new THREE.PointsMaterial({
+        map: dotTex, color: 0xFFD700, size: 0.026, transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      });
+      const dust = new THREE.Points(pGeom, pMat);
+      dust.renderOrder = 12;
+      rig.add(dust);
+
+      // 6. Interactive 3D Cultural Hotspots
+      const pinCanvas = document.createElement('canvas'); pinCanvas.width = pinCanvas.height = 128;
+      const pctx = pinCanvas.getContext('2d');
+      pctx.beginPath(); pctx.arc(64, 64, 44, 0, Math.PI * 2); pctx.fillStyle = 'rgba(232, 96, 28, 0.45)'; pctx.fill();
+      pctx.beginPath(); pctx.arc(64, 64, 32, 0, Math.PI * 2); pctx.fillStyle = '#FFFFFF'; pctx.fill();
+      pctx.beginPath(); pctx.arc(64, 64, 14, 0, Math.PI * 2); pctx.fillStyle = '#A72626'; pctx.fill();
+      const pinTex = new THREE.CanvasTexture(pinCanvas);
+
+      const hotspotConfigs = [
+        { id: 'dancer',  x:  0.06, y: -0.15, z: 0.12 },
+        { id: 'mandir',  x:  0.02, y:  0.42, z: 0.08 },
+        { id: 'chariot', x: -0.28, y:  0.18, z: 0.10 },
+        { id: 'textile', x:  0.30, y: -0.02, z: 0.11 },
+        { id: 'tribal',  x:  0.22, y:  0.16, z: 0.10 }
+      ];
+      const hotspotMeshes = [];
+      const hotspotGeom = new THREE.PlaneGeometry(0.085, 0.085);
+
+      hotspotConfigs.forEach(h => {
+        const hm = new THREE.Mesh(
+          hotspotGeom,
+          new THREE.MeshBasicMaterial({ map: pinTex, transparent: true, opacity: 0, depthWrite: false })
+        );
+        hm.position.set(h.x, h.y, h.z);
+        hm.userData = { id: h.id, baseY: h.y };
+        hm.renderOrder = 15;
+        rig.add(hm);
+        hotspotMeshes.push(hm);
+      });
+
+      // Raycaster for touch/tap
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      let hotspotsActive = false;
+
+      const handleTap = (clientX, clientY) => {
+        if (!hotspotsActive) return;
+        const rect = $('ar-viewport').getBoundingClientRect();
+        mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const hits = raycaster.intersectObjects(hotspotMeshes);
+        if (hits.length > 0) {
+          showStory(hits[0].object.userData.id);
+        }
+      };
+      window.addEventListener('click', e => handleTap(e.clientX, e.clientY));
+      window.addEventListener('touchend', e => {
+        if (e.changedTouches && e.changedTouches.length > 0) {
+          handleTap(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+        }
+      });
+
+      // 7. Attach Rig to Anchor
+      const anchor = mindar.addAnchor(0);
+      anchor.group.add(rig);
+
+      // Tracking state listeners
+      let found = false, t0 = null, shimmerFired = false;
+      anchor.onTargetFound = () => {
+        found = true;
+        sound.chime();
+        $('viewfinder-guide').classList.add('locked');
+        $('status-icon').classList.remove('spin');
+        $('status-text').textContent = 'There it is! Watch closely...';
+      };
+      anchor.onTargetLost = () => {
+        found = false;
+        $('viewfinder-guide').classList.remove('locked');
+        $('status-icon').classList.add('spin');
+        $('status-text').textContent = 'Lost the poster. Point back at it.';
+      };
+
+      // Start Camera
+      await mindar.start();
+
+      const clock = new THREE.Clock();
+      const clamp = (v, min = 0, max = 1) => Math.min(max, Math.max(min, v));
+      const smoothEase = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      const outBack = t => 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2);
+
+      let nextBlink = 3.0, isBlinking = false, blinkStart = 0;
+
+      // Animation Loop
+      renderer.setAnimationLoop(() => {
+        const time = clock.getElapsedTime();
+        let lift = 0, reveal = 0;
+
+        if (found) {
+          if (t0 === null) t0 = time;
+          const s = time - t0;
+          lift = outBack(clamp(s / 1.8));
+          reveal = smoothEase(clamp((s - 0.8) / 5.2));
+
+          if (s >= 0.8 && !shimmerFired) {
+            shimmerFired = true;
+            sound.shimmer();
+          }
+
+          if (reveal >= 0.85) {
+            hotspotsActive = true;
+          }
+        } else {
+          hotspotsActive = false;
+        }
+
+        // Reveal Shader Uniforms
+        revealMesh.material.uniforms.uP.value = reveal;
+        revealMesh.material.uniforms.uT.value = time;
+
+        // Dancer Breathing & Graceful Sway
+        const breath = Math.sin(time * 1.57);
+        mDancer.scale.set(1.0 + 0.008 * breath * lift, 1.0 + 0.004 * breath * lift, 1.0);
+        mDancer.position.z = 0.045 + (0.04 * lift) + (0.003 * breath * lift);
+        const swayRotZ = Math.sin(time * 0.8) * 0.008 * lift;
+        const swayRotX = Math.cos(time * 0.6) * 0.006 * lift;
+        mDancer.rotation.set(swayRotX, 0, swayRotZ);
+
+        // Dancer Dynamic Contact Shadow
+        mDShadow.position.set(0.0704 + 0.012 * lift, -0.1728 - 0.016 * lift, 0.006);
+        mDShadow.material.opacity = (0.25 + 0.55 * lift) * reveal;
+
+        // Natural Eye Blinking Logic
+        if (!isBlinking && time >= nextBlink) {
+          isBlinking = true;
+          blinkStart = time;
+          nextBlink = time + 3.2 + Math.random() * 2.6;
+        }
+        if (isBlinking) {
+          const bp = (time - blinkStart) / 0.18;
+          if (bp >= 1.0) {
+            isBlinking = false;
+            mEyelid.material.opacity = 0;
+          } else {
+            mEyelid.material.opacity = Math.sin(bp * Math.PI) * reveal;
+          }
+        }
+        mEyelid.position.z = mDancer.position.z + 0.002;
+        mEyelid.rotation.set(swayRotX, 0, swayRotZ);
+
+        // Sambalpuri Saree Wave
+        const clothWave = Math.sin(time * 2.2 + 0.5) * 0.007 * lift;
+        mSaree.position.set(0.2825 + clothWave * 0.5, -0.0119, 0.035 + (0.028 * lift));
+        mSaree.rotation.set(clothWave * 0.4, clothWave, clothWave * 0.8);
+
+        // Puri Chariot Canopy Flutter
+        mChariot.position.z = 0.024 + (0.018 * lift);
+        mChariot.rotation.z = Math.sin(time * 1.1) * 0.006 * lift;
+
+        // Konark Temple Parallax Depth
+        mMandir.position.z = 0.014 + (0.010 * lift);
+
+        // Tribal Girl & Mask Tilt
+        mTribal.position.z = 0.028 + (0.022 * lift) + Math.sin(time * 1.4) * 0.003 * lift;
+        mMask.position.z = 0.040 + (0.032 * lift);
+        mMask.rotation.set(Math.cos(time * 0.9) * 0.005 * lift, 0, 0);
+
+        // Dust Particle Floating
+        const pos = pGeom.attributes.position;
+        for (let i = 0; i < particleCount; i++) {
+          let y = pos.getY(i) + 0.0008 * (1.0 + 0.4 * Math.sin(time * 1.5 + i));
+          let x = pos.getX(i) + Math.sin(time * 0.7 + i * 0.8) * 0.0004;
+          if (y > POSTER_ASPECT / 2) y = -POSTER_ASPECT / 2;
+          pos.setY(i, y);
+          pos.setX(i, x);
+        }
+        pos.needsUpdate = true;
+        pMat.opacity = (0.75 * Math.sin(Math.PI * reveal) + 0.35 * reveal) * lift;
+
+        // Hotspot Pulsing & Visibility
+        const targetHotspotOpacity = hotspotsActive ? 1.0 : 0.0;
+        hotspotMeshes.forEach((hm, i) => {
+          hm.material.opacity = THREE.MathUtils.lerp(hm.material.opacity, targetHotspotOpacity, 0.08);
+          if (hotspotsActive) {
+            const pulse = 1.0 + 0.12 * Math.sin(time * 3.5 + i * 1.4);
+            hm.scale.set(pulse, pulse, 1.0);
+            hm.position.y = hm.userData.baseY + 0.005 * Math.sin(time * 2.0 + i);
+          }
+        });
+
+        renderer.render(scene, camera);
+      });
+    }
+  </script>
+</body>
+</html>

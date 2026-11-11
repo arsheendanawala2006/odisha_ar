@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Odisha AR — Print-Ready QR Code Entry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0A1D37;
+      --vermillion: #A72626;
+      --saffron: #E8601C;
+      --paper: #FAF7F2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      background: radial-gradient(circle at 50% 20%, #152B4D 0%, #0A1D37 100%);
+      color: var(--paper);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      text-align: center;
+    }
+    .card {
+      background: rgba(255, 252, 247, 0.94);
+      color: var(--navy);
+      padding: 2.2rem 2rem;
+      border-radius: 28px 60px 24px 44px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      max-width: 440px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .brand-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin: 0 0 0.2rem;
+      color: var(--navy);
+    }
+    .brand-sub {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--vermillion);
+      margin: 0 0 1.2rem;
+      text-transform: uppercase;
+    }
+    .tagline-banner {
+      background: rgba(232, 96, 28, 0.1);
+      color: var(--saffron);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+    }
+    .qr-frame {
+      padding: 12px;
+      background: #FFFFFF;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(10, 29, 55, 0.15);
+      margin-bottom: 1.4rem;
+    }
+    .qr-frame img {
+      display: block;
+      width: min(72vw, 260px);
+      height: min(72vw, 260px);
+    }
+    .url-preview {
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: #6C7D93;
+      word-break: break-all;
+      background: rgba(10, 29, 55, 0.06);
+      padding: 0.5rem 0.8rem;
+      border-radius: 8px;
+      max-width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: linear-gradient(135deg, var(--saffron) 0%, var(--vermillion) 100%);
+      color: #FFFFFF;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.9rem 1.8rem;
+      border-radius: 12px 24px 12px 24px;
+      box-shadow: 0 8px 20px rgba(167, 38, 38, 0.35);
+      transition: transform 0.2s ease;
+    }
+    .btn-download:hover { transform: translateY(-2px); }
+    .btn-download svg { width: 18px; height: 18px; fill: currentColor; }
+    .print-note {
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 1.4rem;
+      max-width: 360px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="card">
+    <h1 class="brand-title">ODISHA, IN COLOUR</h1>
+    <div class="brand-sub">Augmented Reality Experience</div>
+    <div class="tagline-banner">SCAN. LOOK CLOSER. DISCOVER ODISHA.</div>
+
+    <div class="qr-frame">
+      <img id="qr-img" alt="QR Code pointing directly to hosted Odisha WebAR experience">
+    </div>
+
+    <div class="url-preview" id="url-text">Generating destination link...</div>
+
+    <a id="btn-download" class="btn-download" download="odisha-in-colour-qr.png">
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      <span>Download Print QR (PNG)</span>
+    </a>
+  </main>
+
+  <p class="print-note">
+    Print this QR code discreetly in a white margin next to the black-and-white poster. Keep at least a 5mm white quiet zone.
+  </p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    // Compute absolute production URL of index.html
+    const arUrl = new URL('./', window.location.href).href;
+    document.getElementById('url-text').textContent = arUrl;
+
+    const qrContainer = document.createElement('div');
+    new QRCode(qrContainer, {
+      text: arUrl,
+      width: 1024,
+      height: 1024,
+      correctLevel: QRCode.CorrectLevel.H // High error correction for robust phone scanning
+    });
+
+    setTimeout(() => {
+      const srcCanvas = qrContainer.querySelector('canvas');
+      if (!srcCanvas) return;
+
+      // Add generous white quiet zone for print readiness (1200 x 1200 px)
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = 1200;
+      exportCanvas.height = 1200;
+      const ctx = exportCanvas.getContext('2d');
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, 1200, 1200);
+      ctx.drawImage(srcCanvas, 88, 88, 1024, 1024);
+
+      const highResPng = exportCanvas.toDataURL('image/png');
+      document.getElementById('qr-img').src = highResPng;
+      document.getElementById('btn-download').href = highResPng;
+    }, 200);
+  </script>
+</body>
+</html>
